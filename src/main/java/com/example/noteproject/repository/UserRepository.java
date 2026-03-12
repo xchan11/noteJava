@@ -17,5 +17,14 @@ public interface UserRepository extends JpaRepository<User, Integer> {
      * @return 匹配的用户，若不存在则返回 null
      */
     User findByPhone(String phone);
+
+    /**
+     * 根据手机号查询其他用户（排除当前用户），用于修改基本信息时校验唯一性。
+     *
+     * @param phone 手机号
+     * @param id    当前用户 ID
+     * @return 匹配的其他用户，若不存在则返回 null
+     */
+    User findByPhoneAndIdNot(String phone, Integer id);
 }
 

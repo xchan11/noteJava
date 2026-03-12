@@ -8,7 +8,10 @@ import lombok.Data;
 @Data
 public class UserInfoResponse {
 
-    private Integer id;
+    /**
+     * 用户 ID（与 Android 端字段命名对齐）。
+     */
+    private Integer userId;
 
     private String username;
 

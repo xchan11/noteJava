@@ -6,13 +6,14 @@ package com.example.noteproject.exception;
 public class BusinessException extends RuntimeException {
 
     /**
-     * 业务错误码，默认值为 1。
+     * 业务错误码，默认值为 400（通用业务校验错误）。
      */
     private final int code;
 
     public BusinessException(String message) {
         super(message);
-        this.code = 1;
+        // 默认按 400 处理业务校验错误，例如参数不合法、手机号已注册等。
+        this.code = 400;
     }
 
     public BusinessException(int code, String message) {

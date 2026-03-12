@@ -2,6 +2,7 @@ package com.example.noteproject.entity;
 
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -42,5 +43,12 @@ public class User {
     @Column(name = "create_time", updatable = false)
     @CreationTimestamp
     private LocalDateTime createTime;
+
+    /**
+     * 更新时间，只要有字段被更新就自动维护。
+     */
+    @Column(name = "update_time")
+    @UpdateTimestamp
+    private LocalDateTime updateTime;
 }
 

@@ -1,0 +1,36 @@
+package com.example.noteproject.interceptor;
+
+import com.example.noteproject.common.ApiResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.MediaType;
+import org.springframework.web.servlet.HandlerInterceptor;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.nio.charset.StandardCharsets;
+
+/**
+ * 登录鉴权拦截器：通过 Cookie 中的 JSESSIONID 解析 Session，检查是否已登录。
+ */
+public class LoginInterceptor implements HandlerInterceptor {
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        HttpSession session = request.getSession(false);
+        Object userId = (session == null) ? null : session.getAttribute("userId");
+
+        if (userId == null) {
+            ApiResponse<Void> body = ApiResponse.error(401, "未登录或会话过期，请重新登录");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.getWriter().write(OBJECT_MAPPER.writeValueAsString(body));
+            return false;
+        }
+        return true;
+    }
+}
+

@@ -25,7 +25,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ApiResponse<Void> handleException(Exception ex) {
         // 实际项目中可以增加日志记录
-        return ApiResponse.error(1, "系统异常，请稍后重试");
+        return ApiResponse.error(500, "系统异常，请稍后重试");
     }
 }
 
