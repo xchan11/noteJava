@@ -23,8 +23,15 @@ public class LoginInterceptor implements HandlerInterceptor {
         Object userId = (session == null) ? null : session.getAttribute("userId");
 
         if (userId == null) {
-            ApiResponse<Void> body = ApiResponse.error(401, "未登录或会话过期，请重新登录");
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            String uri = request.getRequestURI();
+            boolean isNoteApi = (uri != null && uri.startsWith("/note/"));
+
+            // 前端兜底逻辑：/note/** 未登录也按 400 返回（非登录态视同权限不足），并给出明确 msg
+            int code = isNoteApi ? 400 : 401;
+            String message = isNoteApi ? "未登录" : "未登录或会话过期，请重新登录";
+
+            ApiResponse<Void> body = ApiResponse.error(code, message);
+            response.setStatus(isNoteApi ? HttpServletResponse.SC_BAD_REQUEST : HttpServletResponse.SC_UNAUTHORIZED);
             response.setCharacterEncoding(StandardCharsets.UTF_8.name());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.getWriter().write(OBJECT_MAPPER.writeValueAsString(body));

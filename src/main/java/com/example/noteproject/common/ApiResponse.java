@@ -3,7 +3,7 @@ package com.example.noteproject.common;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * 通用接口返回结果封装。统一使用 message 字段（前端约定），不使用 msg。
+ * 通用接口返回结果封装。
  *
  * @param <T> 返回数据类型
  */

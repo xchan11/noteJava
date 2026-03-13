@@ -75,20 +75,41 @@ public class UserController {
     }
 
     /**
+     * 获取当前登录用户信息（基于 Session 中的 userId）。
+     * GET /user/info
+     */
+    @GetMapping("/info")
+    public ApiResponse<UserInfoResponse> getCurrentUserInfo(HttpServletRequest httpRequest) {
+        Integer userId = (Integer) httpRequest.getSession().getAttribute("userId");
+        User user = userService.getById(userId);
+        UserInfoResponse response = new UserInfoResponse();
+        BeanUtils.copyProperties(user, response);
+        response.setUserId(user.getId());
+        return ApiResponse.success(200, "获取用户信息成功", response);
+    }
+
+    /**
      * 修改用户基本信息（用户名 + 手机号），按需更新（基于 Session 获取 userId）。
      * PUT /user/update-info
      */
     @PutMapping("/update-info")
-    public ApiResponse<Void> updateUserInfo(@RequestBody UserUpdateInfoRequest request,
-                                            HttpServletRequest httpRequest) {
+    public ApiResponse<UserInfoResponse> updateUserInfo(@RequestBody UserUpdateInfoRequest request,
+                                                        HttpServletRequest httpRequest) {
         Integer userId = (Integer) httpRequest.getSession().getAttribute("userId");
         boolean updated = userService.updateBasicInfo(userId, request.getUsername(), request.getPhone());
+
+        // 无论是否有修改，都返回当前数据库中的最新用户信息（不含密码）
+        User user = userService.getById(userId);
+        UserInfoResponse response = new UserInfoResponse();
+        BeanUtils.copyProperties(user, response);
+        response.setUserId(user.getId());
+
         if (updated) {
             // 有字段被实际修改
-            return ApiResponse.success(200, "基本信息修改成功", null);
+            return ApiResponse.success(200, "基本信息修改成功", response);
         } else {
             // 传入的数据与数据库完全一致，无需更新
-            return ApiResponse.success(200, "暂无信息需要修改", null);
+            return ApiResponse.success(200, "暂无信息需要修改", response);
         }
     }
 
