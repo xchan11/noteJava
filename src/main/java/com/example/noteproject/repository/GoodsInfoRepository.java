@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
+import java.util.List;
 
 /**
  * 物品信息数据仓库。
@@ -15,12 +16,24 @@ import javax.transaction.Transactional;
 @Repository
 public interface GoodsInfoRepository extends JpaRepository<GoodsInfo, Integer> {
 
-    /**
-     * 按 userId 删除该用户的所有物品信息。
-     * 说明：goods_info 表通过 category_id 关联 goods_category，因此使用子查询按 userId 删除，避免依赖 goods_info 直接存 user_id。
-     *
-     * @return 删除条数
-     */
+    List<GoodsInfo> findByCategoryIdOrderByShelfLifeAsc(Integer categoryId);
+
+    long countByCategoryId(Integer categoryId);
+
+    /** 快过期列表：categoryId 属于用户，remind 已到点且未过期，按 shelfLife 升序。 */
+    List<GoodsInfo> findByCategoryIdInAndRemind7dLessThanEqualAndIsExpireOrderByShelfLifeAsc(
+            List<Integer> categoryIds, Long remind7d, Integer isExpire);
+    List<GoodsInfo> findByCategoryIdInAndRemind3dLessThanEqualAndIsExpireOrderByShelfLifeAsc(
+            List<Integer> categoryIds, Long remind3d, Integer isExpire);
+    List<GoodsInfo> findByCategoryIdInAndRemind1dLessThanEqualAndIsExpireOrderByShelfLifeAsc(
+            List<Integer> categoryIds, Long remind1d, Integer isExpire);
+
+    /** 定时任务：将 shelfLife 已过期的物品标记为 isExpire=1。 */
+    @Modifying
+    @Transactional
+    @Query("update GoodsInfo g set g.isExpire = 1 where g.shelfLife < :now and g.isExpire = 0")
+    int markExpiredByShelfLifeBefore(@Param("now") Long now);
+
     @Modifying
     @Transactional
     @Query("delete from GoodsInfo g where g.categoryId in (select c.id from GoodsCategory c where c.userId = :userId)")

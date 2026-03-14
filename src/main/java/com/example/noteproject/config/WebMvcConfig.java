@@ -15,7 +15,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new LoginInterceptor())
                 .addPathPatterns("/user/update-info", "/user/update-pwd", "/user/logout", "/user/cancel", "/user/info",
-                        "/note/**");
+                        "/note/**", "/category/**", "/goods/**");
     }
 }
 
