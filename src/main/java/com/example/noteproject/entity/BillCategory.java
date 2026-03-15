@@ -22,9 +22,8 @@ public class BillCategory {
     @Column(name = "category_name", nullable = false, length = 100)
     private String categoryName;
 
-    /**
-     * 1 收入 / 2 支出
-     */
-    private Integer type;
+    /** 创建时间，毫秒时间戳，用于列表按创建时间升序。 */
+    @Column(name = "create_time")
+    private Long createTime;
 }
 

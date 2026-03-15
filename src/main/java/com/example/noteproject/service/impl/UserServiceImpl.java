@@ -2,6 +2,7 @@ package com.example.noteproject.service.impl;
 
 import com.example.noteproject.entity.User;
 import com.example.noteproject.exception.BusinessException;
+import com.example.noteproject.repository.BillBudgetRepository;
 import com.example.noteproject.repository.BillCategoryRepository;
 import com.example.noteproject.repository.BillRecordRepository;
 import com.example.noteproject.repository.GoodsCategoryRepository;
@@ -34,19 +35,22 @@ public class UserServiceImpl implements UserService {
     private final BillRecordRepository billRecordRepository;
     private final GoodsCategoryRepository goodsCategoryRepository;
     private final BillCategoryRepository billCategoryRepository;
+    private final BillBudgetRepository billBudgetRepository;
 
     public UserServiceImpl(UserRepository userRepository,
                            NoteRepository noteRepository,
                            GoodsInfoRepository goodsInfoRepository,
                            BillRecordRepository billRecordRepository,
                            GoodsCategoryRepository goodsCategoryRepository,
-                           BillCategoryRepository billCategoryRepository) {
+                           BillCategoryRepository billCategoryRepository,
+                           BillBudgetRepository billBudgetRepository) {
         this.userRepository = userRepository;
         this.noteRepository = noteRepository;
         this.goodsInfoRepository = goodsInfoRepository;
         this.billRecordRepository = billRecordRepository;
         this.goodsCategoryRepository = goodsCategoryRepository;
         this.billCategoryRepository = billCategoryRepository;
+        this.billBudgetRepository = billBudgetRepository;
     }
 
     @Override
@@ -219,6 +223,7 @@ public class UserServiceImpl implements UserService {
         billRecordRepository.deleteByUserId(id);
         goodsCategoryRepository.deleteByUserId(id);
         billCategoryRepository.deleteByUserId(id);
+        billBudgetRepository.deleteByUserId(id);
 
         userRepository.delete(user);
     }

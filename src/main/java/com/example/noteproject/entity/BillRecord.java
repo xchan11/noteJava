@@ -21,6 +21,12 @@ public class BillRecord {
     @Column(name = "category_id", nullable = false)
     private Integer categoryId;
 
+    /**
+     * 收支类型：1 收入 / 2 支出。
+     */
+    @Column(name = "type", nullable = false)
+    private Integer type;
+
     @Column(nullable = false, precision = 18, scale = 2)
     private BigDecimal amount;
 
