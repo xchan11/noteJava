@@ -39,5 +39,12 @@ public interface BillRecordRepository extends JpaRepository<BillRecord, Integer>
     @Transactional
     @Query("delete from BillRecord r where r.categoryId in (select c.id from BillCategory c where c.userId = :userId)")
     int deleteByUserId(@Param("userId") Integer userId);
+
+    /**
+     * 统计当前用户记账总笔数（收入+支出）。
+     * bill_record 通过 category_id 关联 bill_category，再按 user_id 过滤。
+     */
+    @Query("select count(r) from BillRecord r where r.categoryId in (select c.id from BillCategory c where c.userId = :userId)")
+    long countByUserId(@Param("userId") Integer userId);
 }
 

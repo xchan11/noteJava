@@ -38,5 +38,12 @@ public interface GoodsInfoRepository extends JpaRepository<GoodsInfo, Integer> {
     @Transactional
     @Query("delete from GoodsInfo g where g.categoryId in (select c.id from GoodsCategory c where c.userId = :userId)")
     int deleteByUserId(@Param("userId") Integer userId);
+
+    /**
+     * 统计当前用户物品总数（含过期）。
+     * goods_info 通过 category_id 关联 goods_category，再按 user_id 过滤。
+     */
+    @Query("select count(g) from GoodsInfo g where g.categoryId in (select c.id from GoodsCategory c where c.userId = :userId)")
+    long countByUserId(@Param("userId") Integer userId);
 }
 

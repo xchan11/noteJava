@@ -24,6 +24,9 @@ public interface NoteRepository extends JpaRepository<Note, Integer> {
      */
     List<Note> findAllByUserIdOrderByPlanTimeAsc(Integer userId);
 
+    /** 统计当前用户未完成待办数量（status=0）。 */
+    long countByUserIdAndStatus(Integer userId, Integer status);
+
     /**
      * 按 userId 删除该用户的所有记事数据。
      */
