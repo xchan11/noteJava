@@ -84,6 +84,7 @@ public class BillBudgetServiceImpl implements BillBudgetService {
             r.setTotalSpend(BigDecimal.ZERO);
             r.setRemainAmount(budgetAmount);
             r.setIsOverspend(false);
+            r.setOverspendAmount(BigDecimal.ZERO);
             return r;
         }
 
@@ -98,6 +99,10 @@ public class BillBudgetServiceImpl implements BillBudgetService {
             remainAmount = BigDecimal.ZERO;
         }
         boolean isOverspend = totalSpend.compareTo(budgetAmount) > 0;
+        BigDecimal overspendAmount = BigDecimal.ZERO;
+        if (isOverspend) {
+            overspendAmount = totalSpend.subtract(budgetAmount);
+        }
 
         BillBudgetGetResponse r = new BillBudgetGetResponse();
         r.setYearMonth(ym);
@@ -105,6 +110,7 @@ public class BillBudgetServiceImpl implements BillBudgetService {
         r.setTotalSpend(totalSpend);
         r.setRemainAmount(remainAmount);
         r.setIsOverspend(isOverspend);
+        r.setOverspendAmount(overspendAmount);
         return r;
     }
 

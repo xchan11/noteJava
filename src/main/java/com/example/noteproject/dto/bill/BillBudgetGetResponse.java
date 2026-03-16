@@ -11,4 +11,6 @@ public class BillBudgetGetResponse {
     private BigDecimal totalSpend;
     private BigDecimal remainAmount;
     private Boolean isOverspend;
+    /** 超支金额（仅当 isOverspend=true 时 >0，否则为 0）。 */
+    private BigDecimal overspendAmount;
 }
