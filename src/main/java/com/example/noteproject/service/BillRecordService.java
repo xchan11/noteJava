@@ -3,6 +3,7 @@ package com.example.noteproject.service;
 import com.example.noteproject.dto.bill.BillRecordAddRequest;
 import com.example.noteproject.dto.bill.BillRecordAddResponse;
 import com.example.noteproject.dto.bill.BillRecordItemResponse;
+import com.example.noteproject.dto.bill.BillRecordMonthItemResponse;
 import com.example.noteproject.dto.bill.BillRecordUpdateRequest;
 
 import java.time.LocalDateTime;
@@ -22,4 +23,10 @@ public interface BillRecordService {
     List<BillRecordItemResponse> recent(Integer userId, int limit);
 
     List<BillRecordItemResponse> listByTime(Integer userId, LocalDateTime startTime, LocalDateTime endTime);
+
+    /**
+     * 按月份查询当月所有收支记录（按 createTime 降序）。
+     * createTime 返回格式：yyyy-MM-dd HH:mm:ss（字符串）。
+     */
+    List<BillRecordMonthItemResponse> listAllByMonth(Integer userId, String yearMonth);
 }

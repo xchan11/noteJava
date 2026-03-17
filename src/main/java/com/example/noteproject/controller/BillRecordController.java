@@ -4,6 +4,7 @@ import com.example.noteproject.common.ApiResponse;
 import com.example.noteproject.dto.bill.BillRecordAddRequest;
 import com.example.noteproject.dto.bill.BillRecordAddResponse;
 import com.example.noteproject.dto.bill.BillRecordItemResponse;
+import com.example.noteproject.dto.bill.BillRecordMonthItemResponse;
 import com.example.noteproject.dto.bill.BillRecordUpdateRequest;
 import com.example.noteproject.exception.BusinessException;
 import com.example.noteproject.service.BillRecordService;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -22,6 +24,7 @@ import java.util.List;
 public class BillRecordController {
 
     private static final DateTimeFormatter DATE_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    private static final DateTimeFormatter YEAR_MONTH = DateTimeFormatter.ofPattern("yyyy-MM");
 
     private final BillRecordService billRecordService;
 
@@ -70,6 +73,31 @@ public class BillRecordController {
         LocalDateTime start = parseDateTime(startTime);
         LocalDateTime end = parseDateTime(endTime);
         List<BillRecordItemResponse> data = billRecordService.listByTime(userId, start, end);
+        return ApiResponse.success(200, "查询成功", data);
+    }
+
+    /**
+     * 按月份查询当月所有收支记录（用于月份切换的全收支列表页）。
+     * yearMonth 格式：yyyy-MM；不传则默认当前月份。
+     */
+    @GetMapping("/listAllByMonth")
+    public ApiResponse<List<BillRecordMonthItemResponse>> listAllByMonth(
+            @RequestParam(value = "yearMonth", required = false) String yearMonth,
+            HttpServletRequest httpRequest) {
+        Integer userId = (Integer) httpRequest.getSession().getAttribute("userId");
+        String ym = yearMonth == null || yearMonth.trim().isEmpty()
+                ? YearMonth.now().format(YEAR_MONTH)
+                : yearMonth.trim();
+        // Controller 层做格式校验，便于返回指定提示语
+        try {
+            YearMonth.parse(ym, YEAR_MONTH);
+        } catch (Exception e) {
+            throw new BusinessException("月份格式错误，需为yyyy-MM");
+        }
+        List<BillRecordMonthItemResponse> data = billRecordService.listAllByMonth(userId, ym);
+        if (data.isEmpty()) {
+            return ApiResponse.success(200, "该月份暂无收支记录", data);
+        }
         return ApiResponse.success(200, "查询成功", data);
     }
 

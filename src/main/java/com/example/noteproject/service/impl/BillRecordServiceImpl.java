@@ -3,6 +3,7 @@ package com.example.noteproject.service.impl;
 import com.example.noteproject.dto.bill.BillRecordAddRequest;
 import com.example.noteproject.dto.bill.BillRecordAddResponse;
 import com.example.noteproject.dto.bill.BillRecordItemResponse;
+import com.example.noteproject.dto.bill.BillRecordMonthItemResponse;
 import com.example.noteproject.dto.bill.BillRecordUpdateRequest;
 import com.example.noteproject.entity.BillCategory;
 import com.example.noteproject.entity.BillRecord;
@@ -16,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +32,8 @@ public class BillRecordServiceImpl implements BillRecordService {
 
     private static final int TYPE_INCOME = 1;
     private static final int TYPE_SPEND = 2;
+    private static final DateTimeFormatter YEAR_MONTH = DateTimeFormatter.ofPattern("yyyy-MM");
+    private static final DateTimeFormatter OUT_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private final BillRecordRepository recordRepository;
     private final BillCategoryRepository categoryRepository;
@@ -151,6 +156,33 @@ public class BillRecordServiceImpl implements BillRecordService {
         return list.stream().map(r -> toItemResponse(r, categoryNameMap)).collect(Collectors.toList());
     }
 
+    @Override
+    public List<BillRecordMonthItemResponse> listAllByMonth(Integer userId, String yearMonth) {
+        validateUserId(userId);
+        if (yearMonth == null || yearMonth.trim().isEmpty()) {
+            throw new BusinessException("月份不能为空");
+        }
+        YearMonth ym;
+        try {
+            ym = YearMonth.parse(yearMonth.trim(), YEAR_MONTH);
+        } catch (Exception e) {
+            throw new BusinessException("月份格式错误，需为yyyy-MM");
+        }
+        LocalDateTime start = ym.atDay(1).atStartOfDay();
+        LocalDateTime end = ym.atEndOfMonth().atTime(23, 59, 59, 999_999_999);
+
+        List<Integer> categoryIds = categoryRepository.findByUserIdOrderByCreateTimeAsc(userId)
+                .stream().map(BillCategory::getId).collect(Collectors.toList());
+        if (categoryIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<BillRecord> list = recordRepository.findByCategoryIdInAndCreateTimeBetweenOrderByCreateTimeDesc(
+                categoryIds, start, end);
+        Map<Integer, String> categoryNameMap = categoryRepository.findByUserIdOrderByCreateTimeAsc(userId)
+                .stream().collect(Collectors.toMap(BillCategory::getId, BillCategory::getCategoryName));
+        return list.stream().map(r -> toMonthItemResponse(r, categoryNameMap)).collect(Collectors.toList());
+    }
+
     private void validateUserId(Integer userId) {
         if (userId == null) {
             throw new BusinessException(401, "未登录");
@@ -185,6 +217,18 @@ public class BillRecordServiceImpl implements BillRecordService {
         item.setAmount(r.getAmount());
         item.setRemark(r.getRemark());
         item.setCreateTime(r.getCreateTime());
+        return item;
+    }
+
+    private BillRecordMonthItemResponse toMonthItemResponse(BillRecord r, Map<Integer, String> categoryNameMap) {
+        BillRecordMonthItemResponse item = new BillRecordMonthItemResponse();
+        item.setRecordId(r.getId());
+        item.setCategoryId(r.getCategoryId());
+        item.setCategoryName(categoryNameMap.getOrDefault(r.getCategoryId(), ""));
+        item.setType(r.getType());
+        item.setAmount(r.getAmount());
+        item.setRemark(r.getRemark());
+        item.setCreateTime(r.getCreateTime() == null ? null : r.getCreateTime().format(OUT_TIME));
         return item;
     }
 }
