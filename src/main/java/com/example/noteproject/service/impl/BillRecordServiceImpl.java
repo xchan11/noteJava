@@ -2,6 +2,8 @@ package com.example.noteproject.service.impl;
 
 import com.example.noteproject.dto.bill.BillRecordAddRequest;
 import com.example.noteproject.dto.bill.BillRecordAddResponse;
+import com.example.noteproject.dto.bill.BillRecordCategoryItemResponse;
+import com.example.noteproject.dto.bill.BillRecordCategoryPageResponse;
 import com.example.noteproject.dto.bill.BillRecordItemResponse;
 import com.example.noteproject.dto.bill.BillRecordMonthItemResponse;
 import com.example.noteproject.dto.bill.BillRecordUpdateRequest;
@@ -183,6 +185,31 @@ public class BillRecordServiceImpl implements BillRecordService {
         return list.stream().map(r -> toMonthItemResponse(r, categoryNameMap)).collect(Collectors.toList());
     }
 
+    @Override
+    public BillRecordCategoryPageResponse listAllByCategory(Integer userId, Long categoryId) {
+        validateUserId(userId);
+        if (categoryId == null || categoryId <= 0) {
+            throw new BusinessException("分类ID不能为空");
+        }
+        if (categoryId > Integer.MAX_VALUE) {
+            throw new BusinessException("分类ID不能为空");
+        }
+        Integer cid = categoryId.intValue();
+
+        // 校验分类是否属于当前用户，避免数据越权访问
+        BillCategory category = categoryRepository.findByIdAndUserId(cid, userId)
+                .orElseThrow(() -> new BusinessException(404, "分类不存在或无访问权限"));
+
+        BillRecordCategoryPageResponse resp = new BillRecordCategoryPageResponse();
+        List<BillRecord> list = recordRepository.findByCategoryIdOrderByCreateTimeDesc(category.getId());
+        resp.setTotal(list.size());
+        List<BillRecordCategoryItemResponse> mapped = list.stream()
+                .map(r -> toCategoryItemResponse(r, category))
+                .collect(Collectors.toList());
+        resp.setList(mapped);
+        return resp;
+    }
+
     private void validateUserId(Integer userId) {
         if (userId == null) {
             throw new BusinessException(401, "未登录");
@@ -225,6 +252,19 @@ public class BillRecordServiceImpl implements BillRecordService {
         item.setRecordId(r.getId());
         item.setCategoryId(r.getCategoryId());
         item.setCategoryName(categoryNameMap.getOrDefault(r.getCategoryId(), ""));
+        item.setType(r.getType());
+        item.setAmount(r.getAmount());
+        item.setRemark(r.getRemark());
+        item.setCreateTime(r.getCreateTime() == null ? null : r.getCreateTime().format(OUT_TIME));
+        return item;
+    }
+
+    private BillRecordCategoryItemResponse toCategoryItemResponse(BillRecord r, BillCategory category) {
+        BillRecordCategoryItemResponse item = new BillRecordCategoryItemResponse();
+        item.setRecordId(r.getId());
+        item.setCategoryId(r.getCategoryId());
+        item.setCategoryName(category == null ? null : category.getCategoryName());
+        // 返回整型 type：1=收入 / 2=支出（与其它 bill record 接口统一）
         item.setType(r.getType());
         item.setAmount(r.getAmount());
         item.setRemark(r.getRemark());

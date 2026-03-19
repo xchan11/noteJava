@@ -3,6 +3,7 @@ package com.example.noteproject.service;
 import com.example.noteproject.dto.bill.BillRecordAddRequest;
 import com.example.noteproject.dto.bill.BillRecordAddResponse;
 import com.example.noteproject.dto.bill.BillRecordItemResponse;
+import com.example.noteproject.dto.bill.BillRecordCategoryPageResponse;
 import com.example.noteproject.dto.bill.BillRecordMonthItemResponse;
 import com.example.noteproject.dto.bill.BillRecordUpdateRequest;
 
@@ -29,4 +30,9 @@ public interface BillRecordService {
      * createTime 返回格式：yyyy-MM-dd HH:mm:ss（字符串）。
      */
     List<BillRecordMonthItemResponse> listAllByMonth(Integer userId, String yearMonth);
+
+    /**
+     * 按记账分类 ID 查询该分类下所有收支记录（按 createTime 倒序，不分页）。
+     */
+    BillRecordCategoryPageResponse listAllByCategory(Integer userId, Long categoryId);
 }

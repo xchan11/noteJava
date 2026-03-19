@@ -3,6 +3,7 @@ package com.example.noteproject.controller;
 import com.example.noteproject.common.ApiResponse;
 import com.example.noteproject.dto.bill.BillRecordAddRequest;
 import com.example.noteproject.dto.bill.BillRecordAddResponse;
+import com.example.noteproject.dto.bill.BillRecordCategoryPageResponse;
 import com.example.noteproject.dto.bill.BillRecordItemResponse;
 import com.example.noteproject.dto.bill.BillRecordMonthItemResponse;
 import com.example.noteproject.dto.bill.BillRecordUpdateRequest;
@@ -98,6 +99,19 @@ public class BillRecordController {
         if (data.isEmpty()) {
             return ApiResponse.success(200, "该月份暂无收支记录", data);
         }
+        return ApiResponse.success(200, "查询成功", data);
+    }
+
+    /**
+     * 按分类查询全部收支记录（不分页）：GET /bill/record/category?categoryId=3
+     * 保持与物品模块 listByCategory 的调用风格一致（Query 参数）。
+     */
+    @GetMapping("/category")
+    public ApiResponse<BillRecordCategoryPageResponse> listByCategory(
+            @RequestParam("categoryId") Long categoryId,
+            HttpServletRequest httpRequest) {
+        Integer userId = (Integer) httpRequest.getSession().getAttribute("userId");
+        BillRecordCategoryPageResponse data = billRecordService.listAllByCategory(userId, categoryId);
         return ApiResponse.success(200, "查询成功", data);
     }
 

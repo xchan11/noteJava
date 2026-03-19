@@ -1,6 +1,7 @@
 package com.example.noteproject.repository;
 
 import com.example.noteproject.entity.BillRecord;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -26,6 +27,16 @@ public interface BillRecordRepository extends JpaRepository<BillRecord, Integer>
     /** 按分类 id 列表 + 时间范围查询，按 createTime 降序。 */
     List<BillRecord> findByCategoryIdInAndCreateTimeBetweenOrderByCreateTimeDesc(
             List<Integer> categoryIds, LocalDateTime start, LocalDateTime end);
+
+    /**
+     * 按分类 id 分页查询，按 createTime 倒序。
+     */
+    Page<BillRecord> findByCategoryIdOrderByCreateTimeDesc(Integer categoryId, Pageable pageable);
+
+    /**
+     * 按分类 id 查询所有记录，按 createTime 倒序。
+     */
+    List<BillRecord> findByCategoryIdOrderByCreateTimeDesc(Integer categoryId);
 
     /** 按分类 id 列表 + 时间范围查询（用于统计、图表）。 */
     List<BillRecord> findByCategoryIdInAndCreateTimeBetween(
